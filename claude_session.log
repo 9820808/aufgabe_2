@@ -1,0 +1,382 @@
+ ▐▛███▛█   Claude Code v2.1.311
+▝▜██████▀  Opus 5.5 · Claude Pro
+ ▝▝   ▝▝   ~/work/uni/26W511064-Software_Engineering/v3/aufgabe_3
+
+
+❯ Du findest in diesem Directory ein CLAUDE.md darin ist der Prompt enthalten.  
+  Bei Unklarheiten bitte fragen.                                                
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Das Verzeichnis enthält bisher nur CLAUDE.md. Bevor ich spec.md schreibe, gibt
+  es ein paar Punkte, die ich klären möchte:
+
+● User answered Claude's questions:
+  ⎿  · display() soll laut Prompt 'Breite vor Tiefe' sammeln, aber die Topologie
+     per Einrückung zeigen. Bei echter Breitensuche (BFS) stehen Geschwister 
+     verschiedener Eltern untereinander, die Eltern-Kind-Zuordnung ist dann über
+     Einrückung allein nicht mehr ablesbar. Wie soll die Ausgabe aussehen? → 
+     Tiefensuche (Pre-Order)
+     · Welche Preise sollen die Elemente haben? Hat ein Window selbst einen 
+     Eigenpreis (z.B. Montage), oder ist es nur die Summe seiner Kinder? → 
+     Window = nur Summe
+     · Das Verzeichnis ist kein Git-Repository. Soll ich `git init` machen und 
+     die Schritte (spec, dann Code/Tests) committen? → Ja, git init + Commits
+
+● Danke. Ich schreibe zuerst spec.md (die maßgebliche Quelle) und leite Code und
+  Tests daraus ab.
+
+● Write(spec.md)
+  ⎿  Wrote 131 lines to spec.md
+       1 # Spezifikation: Composite-Demonstrator „Verschachtelbares Fenst
+         er“
+       2 
+       3 ## 1. Ziel
+       4 
+       5 Der Demonstrator zeigt das Composite-Pattern: Ein Baum aus Fenst
+         erteilen
+       6 wird über dieselbe Schnittstelle (`Item`) angesprochen wie ein e
+         inzelnes
+       7 Teil. Der Aufrufer ruft `Price()` bzw. `Display()` nur an der Wu
+     … +125 lines (~5 KB) (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Write(src/window/item.go)
+  ⎿  Wrote 11 lines to src/window/item.go
+       1 // Package window implementiert das Composite-Pattern am Beispie
+         l eines
+       2 // verschachtelbaren Fensters (siehe spec.md).
+       3 package window
+       4 
+       5 // Item ist die gemeinsame Schnittstelle (Component) für Leaves 
+         und
+       6 // Composites. Der Aufrufer behandelt einen ganzen Baum wie ein 
+         einzelnes
+       7 // Item (S-1).
+     … +4 lines (ctrl+o to expand)
+
+● Write(src/window/leaves.go)
+  ⎿  Wrote 42 lines to src/window/leaves.go
+      1 package window
+      2 
+      3 const (
+      4   glassPrice = 30 // S-8
+      5   framePrice = 50 // S-9
+      6 )
+      7 
+      8 // Glass ist eine Glasscheibe (Leaf).
+      9 type Glass struct{}
+     … +33 lines (ctrl+o to expand)
+
+● Write(src/window/window.go)
+  ⎿  Wrote 77 lines to src/window/window.go
+      1 package window
+      2 
+      3 import (
+      4   "errors"
+      5   "fmt"
+      6   "strings"
+      7 )
+      8 
+      9 const indent = "  " // S-13
+     … +68 lines (ctrl+o to expand)
+
+● Write(src/main.go)
+  ⎿  Wrote 81 lines to src/main.go
+       1 // Demonstrator für das Composite-Pattern: baut drei Fensterbäum
+         e und gibt
+       2 // jeweils Display() und Price() aus (S-15, S-16).
+       3 package main
+       4 
+       5 import (
+       6   "fmt"
+       7   "os"
+       8 
+       9   "composite/src/window"
+     … +72 lines (ctrl+o to expand)
+
+● Write(test/window_test.go)
+  ⎿  Wrote 124 lines to test/window_test.go
+       1 package test
+       2 
+       3 import (
+       4   "errors"
+       5   "testing"
+       6 
+       7   "composite/src/window"
+       8 )
+       9 
+      10 // mustWindow baut ein Fenster oder bricht den Test ab.
+     … +114 lines (ctrl+o to expand)
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● I've built the demonstrator: go run ./src prints the three example trees, and
+  go test ./... passes. I wrote spec.md first and derived code and tests from
+  it. Both steps are committed to a new local git repo.
+
+  Your decisions:
+  - display() walks the tree depth-first (Pre-Order) instead of breadth-first
+    ("Breite vor Tiefe") as the prompt literally says. Each child appears
+    directly below its window, indented 2 spaces per level.
+  - Prices: Glass 30, Frame 50. A window has no price of its own; its price() is
+    just the sum of its frame and its four panes.
+
+  Structure:
+  - spec.md: the requirements as numbered points (S-1 to S-16) plus the test
+    cases (T-1 to T-5).
+  - src/window/:
+    - item.go holds the Item interface.
+    - leaves.go holds Glass ("Glass Panel") and Frame.
+    - window.go holds Window, the node that contains the other parts.
+  - src/main.go builds the three example trees and prints Display() and Price()
+    for each.
+  - test/window_test.go covers prices, the exact display output, the error cases
+    when building a window, and that a single part and a whole window are used
+    the same way.
+
+  What else I decided:
+  - Building a window: NewWindow(frame, [4]Item). The array type guarantees
+    exactly four panes. A missing frame, a missing pane or a frame used as a
+    pane returns ErrInvalidWindow.
+  - Display: Window.Display() indents its children's output line by line. So the
+    interface stays exactly as in the diagram, Price() and Display() with no
+    depth parameter.
+  - Thread safety: a window can't be changed after it's built, so reading it
+    from several threads needs no locking. There is no separate store.
+
+  The three examples:
+
+  ┌────────────┬────────────────────────────────────────────────────┬───────┐
+  │  Example   │                       Layout                       │ Price │
+  ├────────────┼────────────────────────────────────────────────────┼───────┤
+  │ Simple     │ four glass panes                                   │ 170   │
+  │ window     │                                                    │       │
+  ├────────────┼────────────────────────────────────────────────────┼───────┤
+  │ Split pane │ the example from the prompt: panes 0–2 glass, pane │ 310   │
+  │            │  3 a sub-window                                    │       │
+  ├────────────┼────────────────────────────────────────────────────┼───────┤
+  │ Muntin     │ three levels deep: pane 0 is a simple window, pane │ 590   │
+  │ window     │  2 is the split-pane example                       │       │
+  └────────────┴────────────────────────────────────────────────────┴───────┘
+
+✻ Worked for 2m 1s · done 1:26 PM
+
+❯ /export claude_session.log                                                    
+  ⎿  Conversation exported to: /home/tom/work/uni/26W511064-Software_Engineering
+     /v3/aufgabe_3/claude_session.log
+
+❯ Kleine Anpassung, ergänze den Display-String jedes Items mit dem eigenen      
+  Preis, bei Window mit dem Preis aller darunter.                               
+
+● Bash(python3 - <<'EOF'
+      import re…)
+  ⎿  ?       composite/src   [no test files]
+     ?       composite/src/window    [no test files]
+     ok      composite/test  0.004s
+     … +29 lines (ctrl+o to expand)
+  ⎿  Updated spec.md (+18 -14)
+      66  
+      67  ## 6. Anzeige
+      68  
+      69 -- **S-11** Jedes Element gibt eine Zeile mit seiner Kennung aus
+         - (siehe                                                        
+      70 -  Abschnitt 2). Jede Zeile endet mit `\n`.                     
+      69 +- **S-11** Jedes Element gibt eine Zeile mit seiner Kennung (si
+         +ehe                                                            
+      70 +  Abschnitt 2) und seinem Preis in Klammern aus, Format        
+      71 +  `<Kennung> (<Preis>)`. Jede Zeile endet mit `\n`.            
+      72 +- **S-11a** Bei `Window` ist der Preis der Gesamtpreis des Teil
+         +baums, also                                                    
+      73 +  `Window.Price()` (S-10).                                     
+      74  - **S-12** `Window.Display()` liefert zuerst die eigene Zeile, 
+          danach in
+      75    dieser Reihenfolge die Ausgaben von: `Frame`, Feld 0, Feld 1,
+           Feld 2,
+      76    Feld 3 (Tiefensuche, Pre-Order: jedes Kind steht direkt unter
+           seinem
+     ...
+      83  Beispiel (Fenster mit Feld 3 als Unterfenster):
+      84  
+      85  ```
+      83 -Window                                                         
+      84 -  Frame                                                        
+      85 -  Glass Panel                                                  
+      86 -  Glass Panel                                                  
+      87 -  Glass Panel                                                  
+      88 -  Window                                                       
+      89 -    Frame                                                      
+      90 -    Glass Panel                                                
+      91 -    Glass Panel                                                
+      92 -    Glass Panel                                                
+      93 -    Glass Panel                                                
+      86 +Window (310)                                                   
+      87 +  Frame (50)                                                   
+      88 +  Glass Panel (30)                                             
+      89 +  Glass Panel (30)                                             
+      90 +  Glass Panel (30)                                             
+      91 +  Window (170)                                                 
+      92 +    Frame (50)                                                 
+      93 +    Glass Panel (30)                                           
+      94 +    Glass Panel (30)                                           
+      95 +    Glass Panel (30)                                           
+      96 +    Glass Panel (30)                                           
+      97  ```
+      98  
+     … 10 more lines (ctrl+o to expand)
+  ⎿  Updated src/window/leaves.go (+6 -4)
+      1  package window
+      2  
+      3 +import "fmt"                                                    
+      4 +                                                                
+      5  const (
+      6          glassPrice = 30 // S-8
+      7          framePrice = 50 // S-9
+     ...
+      20          return glassPrice
+      21  }
+      22  
+      21 -// Display liefert die eigene Zeile ohne Einrückung (S-11, S-14
+         -).                                                             
+      23 +// Display liefert die eigene Zeile mit Preis ohne Einrückung (
+         +S-11, S-14).                                                   
+      24  func (g *Glass) Display() string {
+      23 -        return "Glass Panel\n"                                 
+      25 +        return fmt.Sprintf("Glass Panel (%d)\n", g.Price())    
+      26  }
+      27  
+      28  // Frame ist ein Fensterrahmen (Leaf).
+     ...
+      38          return framePrice
+      39  }
+      40  
+      39 -// Display liefert die eigene Zeile ohne Einrückung (S-11, S-14
+         -).                                                             
+      41 +// Display liefert die eigene Zeile mit Preis ohne Einrückung (
+         +S-11, S-14).                                                   
+      42  func (f *Frame) Display() string {
+      41 -        return "Frame\n"                                       
+      43 +        return fmt.Sprintf("Frame (%d)\n", f.Price())          
+      44  }
+  ⎿  Updated src/window/window.go (+2 -2)
+      53          return sum
+      54  }
+      55  
+      56 -// Display gibt die eigene Zeile aus, danach Frame und Felder 0
+         -..3 in                                                         
+      56 +// Display gibt die eigene Zeile mit dem Preis des Teilbaums au
+         +s (S-11a), danach Frame und Felder 0..3 in                     
+      57  // Pre-Order, jeweils um eine Ebene eingerückt (S-12, S-13).
+      58  func (w *Window) Display() string {
+      59          var b strings.Builder
+      60 -        b.WriteString("Window\n")                              
+      60 +        fmt.Fprintf(&b, "Window (%d)\n", w.Price())            
+      61          writeIndented(&b, w.frame.Display())
+      62          for _, p := range w.panes {
+      63                  writeIndented(&b, p.Display())
+  ⎿  Updated test/window_test.go (+13 -13)
+      61  
+      62  // T-3
+      63  func TestLeafDisplay(t *testing.T) {
+      64 -        if got := window.NewGlass().Display(); got != "Glass Pa
+         -nel\n" {                                                       
+      64 +        if got := window.NewGlass().Display(); got != "Glass Pa
+         +nel (30)\n" {                                                  
+      65                  t.Errorf("Glass.Display() = %q", got)
+      66          }
+      67 -        if got := window.NewFrame().Display(); got != "Frame\n"
+         - {                                                             
+      67 +        if got := window.NewFrame().Display(); got != "Frame (5
+         +0)\n" {                                                        
+      68                  t.Errorf("Frame.Display() = %q", got)
+      69          }
+      70  }
+      71  
+      72  // T-3
+      73  func TestWindowDisplay(t *testing.T) {
+      74 -        want := "Window\n" +                                   
+      75 -                "  Frame\n" +                                  
+      76 -                "  Glass Panel\n" +                            
+      77 -                "  Glass Panel\n" +                            
+      78 -                "  Glass Panel\n" +                            
+      79 -                "  Window\n" +                                 
+      80 -                "    Frame\n" +                                
+      81 -                "    Glass Panel\n" +                          
+      82 -                "    Glass Panel\n" +                          
+      83 -                "    Glass Panel\n" +                          
+      84 -                "    Glass Panel\n"                            
+      74 +        want := "Window (310)\n" +                             
+      75 +                "  Frame (50)\n" +                             
+      76 +                "  Glass Panel (30)\n" +                       
+      77 +                "  Glass Panel (30)\n" +                       
+      78 +                "  Glass Panel (30)\n" +                       
+      79 +                "  Window (170)\n" +                           
+      80 +                "    Frame (50)\n" +                           
+      81 +                "    Glass Panel (30)\n" +                     
+      82 +                "    Glass Panel (30)\n" +                     
+      83 +                "    Glass Panel (30)\n" +                     
+      84 +                "    Glass Panel (30)\n"                       
+      85          if got := split(t).Display(); got != want {
+      86                  t.Errorf("Display() =\n%s\nwant\n%s", got, want
+          )
+      87          }
+
+● Fix the overlong comment line and commit (excluding the exported log).
+
+● Bash(python3 - <<'EOF'
+      p='src/window/window.go'; s=open(p).read()…)
+  ⎿  ?? claude_session.log
+     ?? resume.txt
+     f3d02ec Show price in display output
+  ⎿  Updated src/window/window.go (+3 -2)
+      53          return sum
+      54  }
+      55  
+      56 -// Display gibt die eigene Zeile mit dem Preis des Teilbaums au
+         -s (S-11a), danach Frame und Felder 0..3 in                     
+      57 -// Pre-Order, jeweils um eine Ebene eingerückt (S-12, S-13).   
+      56 +// Display gibt die eigene Zeile mit dem Preis des Teilbaums au
+         +s (S-11a),                                                     
+      57 +// danach Frame und Felder 0..3 in Pre-Order, jeweils um eine E
+         +bene                                                           
+      58 +// eingerückt (S-12, S-13).                                    
+      59  func (w *Window) Display() string {
+      60          var b strings.Builder
+      61          fmt.Fprintf(&b, "Window (%d)\n", w.Price())
+
+● Every line of the display output now ends with that item's price in
+  parentheses. For a window it's the total of everything inside it. I changed
+  spec.md first (new requirement S-11a and the updated example), then the code
+  and tests. The tests pass and the change is committed.
+
+  The format is <Name> (<Preis>), for example from example 2:
+
+  Window (310)
+    Frame (50)
+    Glass Panel (30)
+    Glass Panel (30)
+    Glass Panel (30)
+    Window (170)
+      Frame (50)
+      Glass Panel (30)
+      ...
+
+  For a window, Display() calls Price() itself, so the number shown always
+  matches the calculated total.
+
+  I didn't commit claude_session.log or resume.txt; they're still untracked in
+  the folder.
+
+✻ Baked for 29s · done 1:30 PM
+
+❯ y                                                                             
+
+● I'm not sure what the "y" refers to. My last message had no question in it.
+  Did you mean one of these?
+
+  - Commit claude_session.log and resume.txt as well
+  - Add them to a .gitignore so they stay out of the repo
+  - Something else, or just a stray key
+
+✻ Worked for 5s · done 1:30 PM

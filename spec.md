@@ -66,8 +66,11 @@ type Item interface {
 
 ## 6. Anzeige
 
-- **S-11** Jedes Element gibt eine Zeile mit seiner Kennung aus (siehe
-  Abschnitt 2). Jede Zeile endet mit `\n`.
+- **S-11** Jedes Element gibt eine Zeile mit seiner Kennung (siehe
+  Abschnitt 2) und seinem Preis in Klammern aus, Format
+  `<Kennung> (<Preis>)`. Jede Zeile endet mit `\n`.
+- **S-11a** Bei `Window` ist der Preis der Gesamtpreis des Teilbaums, also
+  `Window.Price()` (S-10).
 - **S-12** `Window.Display()` liefert zuerst die eigene Zeile, danach in
   dieser Reihenfolge die Ausgaben von: `Frame`, Feld 0, Feld 1, Feld 2,
   Feld 3 (Tiefensuche, Pre-Order: jedes Kind steht direkt unter seinem
@@ -80,17 +83,17 @@ type Item interface {
 Beispiel (Fenster mit Feld 3 als Unterfenster):
 
 ```
-Window
-  Frame
-  Glass Panel
-  Glass Panel
-  Glass Panel
-  Window
-    Frame
-    Glass Panel
-    Glass Panel
-    Glass Panel
-    Glass Panel
+Window (310)
+  Frame (50)
+  Glass Panel (30)
+  Glass Panel (30)
+  Glass Panel (30)
+  Window (170)
+    Frame (50)
+    Glass Panel (30)
+    Glass Panel (30)
+    Glass Panel (30)
+    Glass Panel (30)
 ```
 
 ## 7. Programm
@@ -124,7 +127,8 @@ test/              automatisierte Tests (go test ./...)
 
 - **T-1** Preise der Leaves (S-8, S-9).
 - **T-2** Preise der drei Beispielbäume (S-10, Abschnitt 7).
-- **T-3** Exakte `Display()`-Ausgabe für Leaves und Beispiel 2 (S-11–S-14).
+- **T-3** Exakte `Display()`-Ausgabe inkl. Preise für Leaves und Beispiel 2
+  (S-11–S-14).
 - **T-4** `NewWindow` liefert Fehler bei `nil`-Rahmen, `nil`-Feld und
   `Frame` als Feld (S-6).
 - **T-5** Ein `Window` wird als `Item` verwendet (Wurzel und Feld werden

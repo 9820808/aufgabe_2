@@ -53,11 +53,12 @@ func (w *Window) Price() int {
 	return sum
 }
 
-// Display gibt die eigene Zeile aus, danach Frame und Felder 0..3 in
-// Pre-Order, jeweils um eine Ebene eingerückt (S-12, S-13).
+// Display gibt die eigene Zeile mit dem Preis des Teilbaums aus (S-11a),
+// danach Frame und Felder 0..3 in Pre-Order, jeweils um eine Ebene
+// eingerückt (S-12, S-13).
 func (w *Window) Display() string {
 	var b strings.Builder
-	b.WriteString("Window\n")
+	fmt.Fprintf(&b, "Window (%d)\n", w.Price())
 	writeIndented(&b, w.frame.Display())
 	for _, p := range w.panes {
 		writeIndented(&b, p.Display())

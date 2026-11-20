@@ -61,27 +61,27 @@ func TestExamplePrices(t *testing.T) {
 
 // T-3
 func TestLeafDisplay(t *testing.T) {
-	if got := window.NewGlass().Display(); got != "Glass Panel\n" {
+	if got := window.NewGlass().Display(); got != "Glass Panel (30)\n" {
 		t.Errorf("Glass.Display() = %q", got)
 	}
-	if got := window.NewFrame().Display(); got != "Frame\n" {
+	if got := window.NewFrame().Display(); got != "Frame (50)\n" {
 		t.Errorf("Frame.Display() = %q", got)
 	}
 }
 
 // T-3
 func TestWindowDisplay(t *testing.T) {
-	want := "Window\n" +
-		"  Frame\n" +
-		"  Glass Panel\n" +
-		"  Glass Panel\n" +
-		"  Glass Panel\n" +
-		"  Window\n" +
-		"    Frame\n" +
-		"    Glass Panel\n" +
-		"    Glass Panel\n" +
-		"    Glass Panel\n" +
-		"    Glass Panel\n"
+	want := "Window (310)\n" +
+		"  Frame (50)\n" +
+		"  Glass Panel (30)\n" +
+		"  Glass Panel (30)\n" +
+		"  Glass Panel (30)\n" +
+		"  Window (170)\n" +
+		"    Frame (50)\n" +
+		"    Glass Panel (30)\n" +
+		"    Glass Panel (30)\n" +
+		"    Glass Panel (30)\n" +
+		"    Glass Panel (30)\n"
 	if got := split(t).Display(); got != want {
 		t.Errorf("Display() =\n%s\nwant\n%s", got, want)
 	}

@@ -1,5 +1,7 @@
 package window
 
+import "fmt"
+
 const (
 	glassPrice = 30 // S-8
 	framePrice = 50 // S-9
@@ -18,9 +20,9 @@ func (g *Glass) Price() int {
 	return glassPrice
 }
 
-// Display liefert die eigene Zeile ohne Einrückung (S-11, S-14).
+// Display liefert die eigene Zeile mit Preis ohne Einrückung (S-11, S-14).
 func (g *Glass) Display() string {
-	return "Glass Panel\n"
+	return fmt.Sprintf("Glass Panel (%d)\n", g.Price())
 }
 
 // Frame ist ein Fensterrahmen (Leaf).
@@ -36,7 +38,7 @@ func (f *Frame) Price() int {
 	return framePrice
 }
 
-// Display liefert die eigene Zeile ohne Einrückung (S-11, S-14).
+// Display liefert die eigene Zeile mit Preis ohne Einrückung (S-11, S-14).
 func (f *Frame) Display() string {
-	return "Frame\n"
+	return fmt.Sprintf("Frame (%d)\n", f.Price())
 }
